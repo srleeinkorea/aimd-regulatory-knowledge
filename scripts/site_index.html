@@ -32,6 +32,21 @@ nav a:focus-visible,.nav-group summary:focus-visible{outline:2px solid #5eead4}
 .foot a{display:inline;padding:0;color:#5eead4;font-size:10px}
 main{flex:1;min-width:0;display:flex;flex-direction:column}
 iframe{flex:1;border:0;width:100%;min-height:0;background:#fff}
+body:not(.admin) .admin-only{display:none!important}
+.admin-heading{font-size:10px;color:#fbbf24;letter-spacing:.06em;padding:14px 10px 4px;border-top:1px solid var(--side-2);margin-top:6px}
+.tools{display:flex;gap:6px;padding:8px 4px}
+.tools button{flex:1;font:inherit;font-size:12px;font-weight:700;border:1px solid #334155;background:var(--side-2);color:var(--text);border-radius:8px;padding:8px 10px;cursor:pointer}
+.tools button:hover{border-color:var(--muted)}
+.tools button[hidden]{display:none}
+dialog{margin:auto;border:0;border-radius:14px;padding:22px;width:min(380px,calc(100% - 32px));box-shadow:0 20px 50px rgba(15,23,42,.3);color:#0f172a}
+dialog::backdrop{background:rgba(15,23,42,.5)}
+dialog h2{font-size:16px;margin-bottom:6px}
+dialog p{font-size:12px;color:#475569;line-height:1.7;margin-bottom:12px}
+dialog input{width:100%;font:14px Consolas,monospace;padding:10px;border:1px solid #cbd5e1;border-radius:8px}
+dialog .row{display:flex;gap:8px;justify-content:flex-end;margin-top:14px}
+dialog button{font:inherit;font-size:12px;font-weight:700;border:1px solid #cbd5e1;background:#fff;border-radius:8px;padding:8px 14px;cursor:pointer}
+dialog button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+dialog .err{color:#b91c1c;font-size:12px;margin-top:8px;min-height:1em}
 .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 @media(max-width:760px){
  body{flex-direction:column}
@@ -49,13 +64,47 @@ iframe{flex:1;border:0;width:100%;min-height:0;background:#fff}
  <div class="nav-list" id="nav-list">
 <!--__NAV__-->
  </div>
+ <div class="tools"><button id="login-btn" type="button">🔒 관리자 로그인</button><button id="logout-btn" type="button" hidden>로그아웃</button></div>
  <div class="foot">매달 1일 자동 갱신 · 법률 자문 아님<br><a href="https://github.com/srleeinkorea/aimd-regulatory-knowledge" target="_blank" rel="noopener">GitHub 저장소</a></div>
 </nav>
 <main><iframe id="frame" title="문서"></iframe></main>
+<dialog id="login">
+ <form id="login-form">
+  <h2>관리자 로그인</h2>
+  <p>에이전트 프롬프트와 설계 요소는 관리자만 볼 수 있습니다.</p>
+  <label class="sr-only" for="pw">비밀번호</label>
+  <input id="pw" type="password" inputmode="numeric" placeholder="비밀번호" autocomplete="current-password">
+  <div class="err" id="err"></div>
+  <div class="row"><button type="button" id="cancel">취소</button><button class="primary" type="submit">로그인</button></div>
+ </form>
+</dialog>
 <script>
 const links=[...document.querySelectorAll('nav a[data-src]')], frame=document.getElementById('frame');
+// 정적 사이트용 간이 잠금(화면 숨김). 비밀번호 원문 대신 SHA-256 값만 둔다.
+const PW_HASH='03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4';
+const KEY='aimd-admin';
+function isAdmin(){try{return sessionStorage.getItem(KEY)==='1'}catch(e){return document.body.classList.contains('admin')}}
+function setAdmin(on){
+  try{on?sessionStorage.setItem(KEY,'1'):sessionStorage.removeItem(KEY)}catch(e){}
+  document.body.classList.toggle('admin',on);
+  document.getElementById('login-btn').hidden=on; document.getElementById('logout-btn').hidden=!on;
+}
+async function sha256(t){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(t));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}
+const dlg=document.getElementById('login');
+document.getElementById('login-btn').onclick=()=>{document.getElementById('err').textContent='';document.getElementById('pw').value='';dlg.showModal()};
+document.getElementById('cancel').onclick=()=>dlg.close();
+document.getElementById('logout-btn').onclick=()=>{setAdmin(false);show()};
+document.getElementById('login-form').addEventListener('submit',async e=>{
+  e.preventDefault();
+  if(await sha256(document.getElementById('pw').value)===PW_HASH){setAdmin(true);dlg.close();show()}
+  else document.getElementById('err').textContent='비밀번호가 맞지 않습니다. 다시 입력해 주세요.';
+});
+setAdmin(isAdmin());
 function show(){
-  const a=links.find(l=>l.getAttribute('href')===location.hash)||links[0];
+  const visible=links.filter(l=>document.body.classList.contains('admin')||!l.classList.contains('admin-only'));
+  let a=visible.find(l=>l.getAttribute('href')===location.hash);
+  if(!a&&links.some(l=>l.getAttribute('href')===location.hash)){a=visible[0];document.getElementById('login-btn').click()}
+  a=a||visible[0];
   links.forEach(l=>l.toggleAttribute('aria-current',l===a)); a.setAttribute('aria-current','page');
   if(frame.getAttribute('src')!==a.dataset.src) frame.src=a.dataset.src;
   document.title=a.textContent.replace(/^\S+\s/,'')+' · AI 의료기기 인허가 문서함';

@@ -10,7 +10,8 @@ import pathlib
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 SITE = ROOT / "site"
 
-# (그룹, [(id, 아이콘+제목, 원본 경로)])
+# (그룹, [(id, 아이콘+제목, 원본 경로)]) — ADMIN_GROUPS 는 관리자 로그인 후에만 메뉴에 보임
+ADMIN_GROUPS = {"관리자 · 에이전트"}
 MENU = [
     ("한눈에 보기", [
         ("compare", "📊 관할 비교표", "knowledge/90_관할비교표.md"),
@@ -26,8 +27,10 @@ MENU = [
     ("허가 사례", [
         ("kr-ai-list", "📋 한국 AI 허가 후보 목록", "knowledge/11_한국_AI허가목록.md"),
     ]),
-    ("근거 · 도구", [
+    ("근거", [
         ("sources", "🔗 출처 목록", "sources/출처목록.md"),
+    ]),
+    ("관리자 · 에이전트", [
         ("prompt", "🤖 범용 인허가 에이전트 프롬프트", "prompts/범용_인허가에이전트_프롬프트.md"),
         ("design", "🧩 에이전트 설계 요소", "docs/에이전트_설계요소.md"),
     ]),
@@ -49,9 +52,13 @@ for group, items in MENU:
             PAGE.replace("__TITLE__", html.escape(label[2:].strip()))
                 .replace("/*__MD__*/\"\"", json.dumps(md, ensure_ascii=False).replace("</", "<\\/")),
             encoding="utf-8")
-        links.append(f'<a href="#{pid}" data-src="p/{pid}.html">{html.escape(label)}</a>')
+        cls = ' class="admin-only"' if group in ADMIN_GROUPS else ""
+        links.append(f'<a{cls} href="#{pid}" data-src="p/{pid}.html">{html.escape(label)}</a>')
     if links:
-        nav.append(f'<details class="nav-group" open><summary>{html.escape(group)}'
+        if group in ADMIN_GROUPS:
+            nav.append('<div class="admin-heading admin-only">관리자 작업 공간</div>')
+        gcls = "nav-group admin-only" if group in ADMIN_GROUPS else "nav-group"
+        nav.append(f'<details class="{gcls}" open><summary>{html.escape(group)}'
                    f'<span class="group-count">{len(links)}</span></summary>'
                    f'<div class="group-links">\n' + "\n".join(links) + "\n</div></details>")
 
