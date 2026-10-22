@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>제품 찾기</title>
+<script>try{const t=localStorage.getItem("aimd-theme");if(t)document.documentElement.dataset.theme=t}catch(e){}
+addEventListener("message",e=>{if(e.data&&e.data.theme!==undefined){if(e.data.theme)document.documentElement.dataset.theme=e.data.theme;else delete document.documentElement.dataset.theme}})</script>
+<style>
+:root{--bg:#ffffff;--fg:#0f172a;--muted:#64748b;--line:#e2e8f0;--panel:#f8fafc;--accent:#0f766e;--accent-soft:#ccfbf1;--ok:#166534;--ok-soft:#dcfce7;--off:#64748b;--off-soft:#f1f5f9}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f172a;--fg:#e2e8f0;--muted:#94a3b8;--line:#1e293b;--panel:#111c33;--accent:#5eead4;--accent-soft:#134e4a;--ok:#86efac;--ok-soft:#14532d;--off:#94a3b8;--off-soft:#1e293b;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0f172a;--fg:#e2e8f0;--muted:#94a3b8;--line:#1e293b;--panel:#111c33;--accent:#5eead4;--accent-soft:#134e4a;--ok:#86efac;--ok-soft:#14532d;--off:#94a3b8;--off-soft:#1e293b;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:"Malgun Gothic","Apple SD Gothic Neo",system-ui,sans-serif;font-size:14px;line-height:1.6}
+.wrap{max-width:1200px;margin:0 auto;padding:24px max(16px,3vw) 60px}
+h1{font-size:22px;margin:0 0 4px}
+.sub{color:var(--muted);font-size:12.5px;margin:0 0 16px}
+.stats{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 14px;min-width:120px}
+.stat b{display:block;font-size:20px;font-variant-numeric:tabular-nums}
+.stat span{font-size:11.5px;color:var(--muted)}
+.filters{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:12px;background:var(--panel);border:1px solid var(--line);border-radius:10px;margin-bottom:12px}
+.filters input[type=search]{flex:1 1 260px;min-width:0;padding:9px 12px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--fg);font:inherit}
+.filters select{padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--fg);font:inherit;font-size:13px}
+.filters label.chk{display:flex;align-items:center;gap:6px;font-size:13px;white-space:nowrap}
+.count{font-size:12.5px;color:var(--muted);margin:0 0 8px}
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:10px}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{position:sticky;top:0;background:var(--panel);color:var(--muted);font-size:12px;white-space:nowrap;cursor:pointer;user-select:none}
+th[aria-sort]::after{content:" ▾"}th[aria-sort=ascending]::after{content:" ▴"}
+td{font-variant-numeric:tabular-nums}
+td.prod b{display:block}td.prod small{color:var(--muted)}
+tr:last-child td{border-bottom:0}
+.pill{display:inline-block;font-size:11.5px;font-weight:700;padding:1px 8px;border-radius:99px;white-space:nowrap}
+.pill.ok{color:var(--ok);background:var(--ok-soft)}.pill.off{color:var(--off);background:var(--off-soft)}
+.grp{font-size:11.5px;color:var(--accent);background:var(--accent-soft);padding:1px 7px;border-radius:5px;white-space:nowrap}
+button.copy{font:inherit;font-size:12px;border:1px solid var(--line);background:var(--bg);color:var(--fg);border-radius:6px;padding:2px 8px;cursor:pointer;white-space:nowrap}
+button.copy:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--accent)}
+.empty{padding:30px;text-align:center;color:var(--muted)}
+.note{font-size:12px;color:var(--muted);margin-top:12px}
+.note a{color:var(--accent)}
+</style>
+</head>
+<body>
+<div class="wrap">
+ <h1>제품 찾기 · 한국 AI 의료기기</h1>
+ <p class="sub">식약처 의료기기안심책방에서 분류명으로 모은 AI 후보 품목 · 기준일 __ASOF__ · AI 여부는 품목 상세 기재사항으로 확인 필요</p>
+ <div class="stats" id="stats"></div>
+ <div class="filters" role="search">
+  <label class="sr" for="q" hidden>검색</label>
+  <input id="q" type="search" placeholder="업체·제품명·품목명·허가번호 검색 (예: 루닛, 흉부, 뇌)" autocomplete="off">
+  <select id="grp" aria-label="묶음"><option value="">모든 묶음</option></select>
+  <select id="grade" aria-label="등급"><option value="">모든 등급</option><option>2</option><option>3</option></select>
+  <select id="year" aria-label="허가 연도"><option value="">모든 연도</option></select>
+  <label class="chk"><input id="valid" type="checkbox" checked> 지금 유효한 것만</label>
+ </div>
+ <p class="count" id="count"></p>
+ <div class="tbl"><table>
+  <thead><tr><th data-k="date" aria-sort="descending">허가일</th><th data-k="company">업체</th><th data-k="product">제품</th><th data-k="item">품목명</th><th data-k="grade">등급</th><th data-k="status">상태</th><th data-k="no">허가번호</th></tr></thead>
+  <tbody id="rows"></tbody>
+ </table></div>
+ <p class="note">상세 정보(사용 목적·작용원리·성능)는 허가번호를 복사해 <a href="https://emedi.mfds.go.kr/search/data/MNU20237" target="_blank" rel="noopener">의료기기안심책방</a> 품목허가번호 칸에 붙여 넣어 확인하세요. 상태 '전환'은 디지털의료기기로 전환된 품목이며 '정상'과 함께 지금 유효합니다.</p>
+</div>
+<script>
+const DATA=/*__DATA__*/[];
+const VALID=new Set(['정상','전환']);
+const $=id=>document.getElementById(id);
+let sortK='date',sortDir=-1;
+[...new Set(DATA.map(d=>d.group))].forEach(g=>$('grp').add(new Option(g,g)));
+[...new Set(DATA.map(d=>d.date.slice(0,4)).filter(Boolean))].sort().reverse().forEach(y=>$('year').add(new Option(y+'년',y)));
+const v=DATA.filter(d=>VALID.has(d.status));
+$('stats').innerHTML=[[DATA.length,'후보 품목 전체'],[v.length,'지금 유효'],[new Set(v.map(d=>d.company)).size,'유효 품목 보유 업체'],[v.filter(d=>d.grade==='3').length,'유효 3등급']]
+  .map(([n,l])=>`<div class="stat"><b>${n}</b><span>${l}</span></div>`).join('');
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function render(){
+  const q=$('q').value.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  let r=DATA.filter(d=>(!$('valid').checked||VALID.has(d.status))&&(!$('grp').value||d.group===$('grp').value)
+    &&(!$('grade').value||d.grade===$('grade').value)&&(!$('year').value||d.date.startsWith($('year').value))
+    &&q.every(w=>(d.company+' '+d.product+' '+d.item+' '+d.no).toLowerCase().includes(w)));
+  r.sort((a,b)=>String(a[sortK]).localeCompare(String(b[sortK]),'ko',{numeric:true})*sortDir);
+  $('count').textContent=`${r.length}건 표시`;
+  $('rows').innerHTML=r.length?r.map(d=>`<tr><td>${esc(d.date)}</td><td>${esc(d.company)}</td>
+    <td class="prod"><b>${esc(d.product.split(' / ')[0])}</b><small>${esc(d.product.split(' / ').slice(1).join(' / '))}</small></td>
+    <td>${esc(d.item)}<br><span class="grp">${esc(d.group)}</span></td><td>${esc(d.grade)}</td>
+    <td><span class="pill ${VALID.has(d.status)?'ok':'off'}">${esc(d.status)}</span></td>
+    <td><button class="copy" data-no="${esc(d.no)}" title="허가번호 복사">${esc(d.no)}</button></td></tr>`).join('')
+    :'<tr><td colspan="7" class="empty">조건에 맞는 제품이 없습니다. 검색어를 줄이거나 필터를 풀어 보세요.</td></tr>';
+}
+['q','grp','grade','year','valid'].forEach(id=>$(id).addEventListener('input',render));
+document.querySelectorAll('th[data-k]').forEach(th=>th.onclick=()=>{
+  sortDir=sortK===th.dataset.k?-sortDir:(th.dataset.k==='date'?-1:1);sortK=th.dataset.k;
+  document.querySelectorAll('th').forEach(t=>t.removeAttribute('aria-sort'));th.setAttribute('aria-sort',sortDir>0?'ascending':'descending');render()});
+$('rows').addEventListener('click',e=>{const b=e.target.closest('button.copy');if(!b)return;
+  const t=b.dataset.no,done=()=>{b.textContent='복사됨';setTimeout(()=>b.textContent=t,1200)};
+  navigator.clipboard?navigator.clipboard.writeText(t).then(done,()=>{}):0});
+render();
+</script>
+</body>
+</html>

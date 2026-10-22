@@ -25,6 +25,7 @@ MENU = [
         ("jp", "🇯🇵 일본 PMDA", "knowledge/50_일본_PMDA.md"),
     ]),
     ("허가 사례", [
+        ("products", "🔎 제품 찾기 (한국 AI)", None),
         ("kr-ai-list", "📋 한국 AI 허가 후보 목록", "knowledge/11_한국_AI허가목록.md"),
     ]),
     ("근거", [
@@ -39,11 +40,36 @@ MENU = [
 PAGE = (ROOT / "scripts" / "site_page.html").read_text(encoding="utf-8")
 SHELL = (ROOT / "scripts" / "site_index.html").read_text(encoding="utf-8")
 
+def build_products():
+    """11_한국_AI허가목록.md 의 묶음별 표를 검색 페이지 데이터로 바꾼다."""
+    md = (ROOT / "knowledge" / "11_한국_AI허가목록.md").read_text(encoding="utf-8")
+    asof = next((l.split(":", 1)[1].strip() for l in md.splitlines() if l.startswith("기준일")), "")
+    rows, group = [], None
+    for line in md.splitlines():
+        if line.startswith("## "):
+            head = line[3:]
+            group = head.split("(")[0].split("—")[0].strip() if head[:2] in ("A.", "B.", "C.", "D.") else None
+        elif group and line.startswith("|") and not line.startswith("|---") and "허가번호" not in line:
+            c = [x.strip() for x in line.strip("|").split("|")]
+            if len(c) >= 7:
+                rows.append(dict(company=c[0], item=c[1], product=c[2], no=c[3], grade=c[4],
+                                 status=c[5], date=c[6], group=group))
+    tpl = (ROOT / "scripts" / "site_products.html").read_text(encoding="utf-8")
+    (SITE / "p" / "products.html").write_text(
+        tpl.replace("__ASOF__", asof).replace("/*__DATA__*/[]", json.dumps(rows, ensure_ascii=False).replace("</", "<\/")),
+        encoding="utf-8")
+    print(f"products: {len(rows)} rows")
+
+
 (SITE / "p").mkdir(parents=True, exist_ok=True)
 nav = []
 for group, items in MENU:
     links = []
     for pid, label, src in items:
+        if src is None:
+            build_products()
+            links.append(f'<a href="#{pid}" data-src="p/{pid}.html">{html.escape(label)}</a>')
+            continue
         path = ROOT / src
         if not path.exists():
             continue
