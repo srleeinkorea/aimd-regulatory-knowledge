@@ -6,6 +6,7 @@ AI·소프트웨어 의료기기(SaMD/AI-MD)의 인허가를 5개 관할(한국�
 - `knowledge/` — 관할별 지식 문서. 파일마다 맨 위에 `기준일`을 적는다.
   - `00_공통_국제조화.md` IMDRF·ISO/IEC 표준 등 공통 기반
   - `10_한국_MFDS.md` / `20_미국_FDA.md` / `30_EU_MDR_AIAct.md` / `40_싱가포르_HSA.md` / `50_일본_PMDA.md`
+  - `11_한국_AI허가목록.md` 식약처 AI 후보 품목 목록 (`scripts/fetch_mfds_ai.py` 로 다시 만듦)
   - `90_관할비교표.md` 한 장 비교
 - `sources/출처목록.md` — 근거 URL과 확인일. 새 근거는 여기에 먼저 적는다.
 - `prompts/` — 다른 도구에서도 쓰는 범용 프롬프트.
