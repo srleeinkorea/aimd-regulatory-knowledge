@@ -56,7 +56,7 @@ def build_products():
                                  status=c[5], date=c[6], group=group))
     tpl = (ROOT / "scripts" / "site_products.html").read_text(encoding="utf-8")
     (SITE / "p" / "products.html").write_text(
-        tpl.replace("__ASOF__", asof).replace("/*__DATA__*/[]", json.dumps(rows, ensure_ascii=False).replace("</", "<\/")),
+        tpl.replace("__ASOF__", asof).replace("/*__DATA__*/[]", json.dumps(rows, ensure_ascii=False).replace("</", "<\\/")),
         encoding="utf-8")
     print(f"products: {len(rows)} rows")
 
