@@ -13,7 +13,7 @@ AI·소프트웨어 의료기기(SaMD/AI-MD)의 인허가를 5개 관할(한국�
 - `docs/에이전트_설계요소.md` — 에이전트를 설계할 때 정해야 할 것.
 - 에이전트 정의: `.claude/agents/aimd-ra.md`
 
-원격 저장소: https://github.com/srleeinkorea/aimd-regulatory-knowledge (비공개, main 한 곳에만 올림)
+원격 저장소: https://github.com/srleeinkorea/aimd-regulatory-knowledge (공개, main 한 곳에만 올림)
 공개 사이트: https://srleeinkorea.github.io/aimd-regulatory-knowledge/ (main push 시 Actions 가 `scripts/build_site.py` 로 site/ 를 만들어 배포. 새 문서는 MENU 에 추가. 저장소 공개 — 미공개 정보 금지)
 
 ## 규칙
