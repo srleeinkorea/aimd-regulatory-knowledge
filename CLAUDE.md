@@ -14,6 +14,7 @@ AI·소프트웨어 의료기기(SaMD/AI-MD)의 인허가를 5개 관할(한국�
 - 에이전트 정의: `.claude/agents/aimd-ra.md`
 
 원격 저장소: https://github.com/srleeinkorea/aimd-regulatory-knowledge (비공개, main 한 곳에만 올림)
+확인용 페이지: https://claude.ai/artifact/QmYDnLfgWdh381YWcSj2Cu (`py scripts/build_site.py` 로 site/index.html 생성 후 게시)
 
 ## 규칙
 - 날짜·조항·기한은 1차 출처(관보, 기관 공지·가이드라인 원문)로 확인한 것만 "확정"으로 쓴다. 로펌·언론 해설만 있으면 "확인 필요"로 둔다.
