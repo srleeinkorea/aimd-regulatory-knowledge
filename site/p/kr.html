@@ -4,9 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>한국 MFDS</title>
+<script>try{const t=localStorage.getItem("aimd-theme");if(t)document.documentElement.dataset.theme=t}catch(e){}
+addEventListener("message",e=>{if(e.data&&e.data.theme!==undefined){if(e.data.theme)document.documentElement.dataset.theme=e.data.theme;else delete document.documentElement.dataset.theme}})</script>
 <style>
 :root{--bg:#ffffff;--fg:#0f172a;--muted:#64748b;--line:#e2e8f0;--accent:#0f766e;--accent-soft:#ccfbf1;--warn:#92400e;--warn-soft:#fef3c7;--code:#f1f5f9}
-@media (prefers-color-scheme:dark){:root{--bg:#0f172a;--fg:#e2e8f0;--muted:#94a3b8;--line:#1e293b;--accent:#5eead4;--accent-soft:#134e4a;--warn:#fcd34d;--warn-soft:#422006;--code:#1e293b;color-scheme:dark}}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f172a;--fg:#e2e8f0;--muted:#94a3b8;--line:#1e293b;--accent:#5eead4;--accent-soft:#134e4a;--warn:#fcd34d;--warn-soft:#422006;--code:#1e293b;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0f172a;--fg:#e2e8f0;--muted:#94a3b8;--line:#1e293b;--accent:#5eead4;--accent-soft:#134e4a;--warn:#fcd34d;--warn-soft:#422006;--code:#1e293b;color-scheme:dark}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--fg);font-family:"Malgun Gothic","Apple SD Gothic Neo",system-ui,sans-serif;font-size:15px;line-height:1.7}
 article{max-width:1000px;margin:0 auto;padding:28px max(16px,4vw) 60px}
